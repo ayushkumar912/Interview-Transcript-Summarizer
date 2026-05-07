@@ -185,9 +185,11 @@ Errors are printed to stderr and the command exits with status code `1`.
 
 ## Reflection
 
-The main design tradeoff is using one strong prompt instead of a larger pipeline. That keeps the project easy to review, avoids unnecessary infrastructure, and matches the assignment requirement to prefer a single API call.
+What surprised me most was how much of the output quality came from small prompt constraints rather than code complexity. The first versions could produce reasonable-looking summaries, but they were too willing to infer seniority or role confidence from weak evidence. Adding explicit grounding rules, uncertainty language, and a strict JSON schema improved the output more than adding another processing step would have.
 
-The schema validation is intentionally lightweight. It verifies shape and required fields, while leaving the LLM responsible for the semantic quality of the summary.
+With another day, I would improve validation beyond schema shape. Right now `validate_response()` confirms that required fields exist and have the right types, but it does not check whether the summary is actually grounded in the transcript. A useful next step would be a lightweight post-processing check that flags unsupported seniority claims, overly broad role labels, or missing uncertainty language when the transcript has limited evidence. I would also add unit tests with mocked Gemini responses and a few regression transcripts to make prompt changes safer.
+
+The final prompt is intentionally simple and works well for one-call recruiter summaries, but it has limits. Long transcripts may need chunking, and the model can still compress nuance too aggressively. The prompt also asks for evidence-based justification, but it does not require exact transcript quotes or timestamps, so traceability is limited. The output should be treated as a recruiter aid, not a source of truth for hiring decisions.
 
 ## Limitations
 
