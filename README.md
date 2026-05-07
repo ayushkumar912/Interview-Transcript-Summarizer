@@ -43,6 +43,8 @@ The CLI prints formatted JSON to stdout and can also save the same JSON to a fil
 
 ## Setup
 
+Use Python 3.10 or newer. Python 3.9 may still run the script, but some dependencies now warn that Python 3.9 is past end of life.
+
 Create and activate a virtual environment:
 
 ```bash
@@ -100,10 +102,17 @@ Use a different Gemini model when your API project has quota limitations:
 python summarizer.py path/to/transcript.txt --model gemini-2.5-flash-lite
 ```
 
-You can also set the model through an environment variable:
+You can also set the model through an environment variable for one command:
 
 ```bash
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash-lite python summarizer.py path/to/transcript.txt
+```
+
+Or export it for the current shell session:
+
+```bash
+export GEMINI_MODEL=gemini-2.5-flash-lite
+python summarizer.py path/to/transcript.txt
 ```
 
 ## Sample Runs
@@ -131,6 +140,47 @@ Saved sample JSON files:
 - `outputs/sample_transcript_assignment_2_summary.json`
 
 Markdown copies of sample outputs are available in `sample_outputs.md`.
+
+## Testing
+
+Run a syntax check:
+
+```bash
+python -m compileall -q -b summarizer.py
+```
+
+Check the CLI arguments:
+
+```bash
+python summarizer.py --help
+```
+
+Test basic error handling with a missing file:
+
+```bash
+python summarizer.py missing_transcript.txt
+```
+
+Run a live Gemini test with a sample transcript:
+
+```bash
+python summarizer.py sample_transcript_assignment_1.txt \
+  --model gemini-2.5-flash-lite \
+  --output outputs/sample_transcript_assignment_1_summary.json
+```
+
+Validate the saved JSON:
+
+```bash
+python -m json.tool outputs/sample_transcript_assignment_1_summary.json
+python -m json.tool outputs/sample_transcript_assignment_2_summary.json
+```
+
+Expected behavior:
+
+- Successful runs print formatted JSON to stdout.
+- When `--output` is provided, the same JSON is saved to that file.
+- Invalid input or API failures print an error to stderr and exit with status code `1`.
 
 ## Model and Provider Choice
 
@@ -198,4 +248,3 @@ The final prompt is intentionally simple and works well for one-call recruiter s
 - JSON validation checks structure, not factual perfection.
 - Role and seniority inference should be treated as recruiter-supporting context, not a hiring decision.
 - API quota depends on the selected Gemini model and Google project configuration.
-# -
